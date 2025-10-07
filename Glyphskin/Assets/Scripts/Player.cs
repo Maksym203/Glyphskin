@@ -263,7 +263,7 @@ public class Player : MonoBehaviour
                 animator.Play("Jump_Start");
                 break;
             case PlayerState.JumpDown:
-                animator.Play("Jump_Up");
+                animator.Play("Jump_Down");
                 break;
             case PlayerState.JumpLand:
                 animator.Play("Jump_Start");
