@@ -2,13 +2,26 @@ using UnityEngine;
 
 public class Player : MonoBehaviour
 {
+    [Header("Movement Settings")]
     public float moveSpeed = 5f;
+    public float jumpForce = 2f;
+    public float jumpDuration = 0.5f;
 
     private Rigidbody2D rb;
     private Animator animator;
     private Vector2 moveInput;
 
     private PlayerState currentState;
+    private bool isJumping = false;
+    private float jumpTimeCounter = 0f;
+    private bool isGrounded = true;
+
+    private float zeroTimerDuration = 0.05f;
+    private float zeroThreshold = 0.01f;
+    private float zeroTimer = 0f;
+    private bool zeroTimerRunning = false;
+    private bool zeroTimerExpired = false;
+    private float maxZeroTime = 0.15f;
 
     private enum PlayerState
     {
@@ -39,15 +52,138 @@ public class Player : MonoBehaviour
     private void HandleInput()
     {
         moveInput.x = Input.GetAxisRaw("Horizontal");
+
+        if (!isGrounded)
+        {
+            float vy = rb.linearVelocity.y;
+            bool nearlyZero = Mathf.Abs(vy) <= zeroThreshold;
+
+            //First time we hit nearly zero while midair, start the timer (only if not already started)
+            if (!zeroTimerRunning && !zeroTimerExpired && nearlyZero)
+            {
+                zeroTimerRunning = true;
+                zeroTimer = 0f;
+            }
+
+            //If the timer is running, update it
+            if (zeroTimerRunning)
+            {
+                zeroTimer += Time.deltaTime;
+
+                if (zeroTimer >= maxZeroTime)
+                {
+                    isJumping = false;
+                    isGrounded = true;
+                    zeroTimerRunning = false;
+                    zeroTimerExpired = false;
+                    zeroTimer = 0f;
+                }
+
+                if (zeroTimer >= zeroTimerDuration)
+                {
+                    zeroTimerRunning = false;
+                    //Timer finished; next zero will set grounded
+                    zeroTimerExpired = true;
+                }
+            }
+
+            //If timer already expired, the next time velocity is zero we set grounded
+            if (zeroTimerExpired && nearlyZero)
+            {
+                isJumping = false;
+                isGrounded = true;
+                zeroTimerExpired = false;
+                zeroTimer = 0f;
+                zeroTimerRunning = false;
+            }
+        }
+        else
+        {
+            // if already grounded reset the zero-timer states
+            zeroTimer = 0f;
+            zeroTimerRunning = false;
+            zeroTimerExpired = false;
+        }
+
+        if (Input.GetButtonDown("Jump") && isGrounded)
+        {
+            isJumping = true;
+            jumpTimeCounter = 0f;
+            isGrounded = false;
+
+            float horizontalVelocity = rb.linearVelocity.x;
+
+            if (Mathf.Abs(moveInput.x) > 0.1f)
+            {
+                horizontalVelocity = moveInput.x * moveSpeed;
+            }
+            else
+            {
+                horizontalVelocity = 0f;
+            }
+
+            rb.linearVelocity = new Vector2(horizontalVelocity, jumpForce);
+        }
+
+        if (Input.GetButton("Jump") && isJumping)
+        {
+            jumpTimeCounter += Time.deltaTime;
+
+            if (jumpTimeCounter < jumpDuration)
+            {
+                float t = jumpTimeCounter / jumpDuration;
+                float curve = Mathf.Pow(1f - t, 1.1f);
+                float adjustedForce = jumpForce * curve;
+
+                rb.linearVelocity = new Vector2(rb.linearVelocity.x, adjustedForce);
+            }
+            else
+            {
+                isJumping = false;
+            }
+        }
+
+        if (Input.GetButtonUp("Jump"))
+        {
+            isJumping = false;
+        }
     }
 
     private void Move()
     {
-        rb.linearVelocity = new Vector2(moveInput.x * moveSpeed, rb.linearVelocity.y);
+        float currentMoveSpeed = moveSpeed;
+
+        if (isGrounded)
+        {
+            // Grounded movement: normal speed, fully controlled
+            rb.linearVelocity = new Vector2(moveInput.x * currentMoveSpeed, rb.linearVelocity.y);
+        }
+        else
+        {
+            // Midair movement: only apply input if player is pressing left/right
+            if (Mathf.Abs(moveInput.x) > 0.01f)
+            {
+                // Slightly reduced air control
+                rb.linearVelocity = new Vector2(moveInput.x * currentMoveSpeed * 0.8f, rb.linearVelocity.y);
+            }
+        }
     }
+
 
     private void UpdateState()
     {
+        if (!isGrounded)
+        {
+            // Keep idle animation direction while jumping/falling
+            if (currentState == PlayerState.WalkRight || currentState == PlayerState.IdleRight)
+                currentState = PlayerState.IdleRight;
+            else
+                currentState = PlayerState.IdleLeft;
+
+            return;
+        }
+
+        // Ground
         if (moveInput.x > 0.1f)
             currentState = PlayerState.WalkRight;
         else if (moveInput.x < -0.1f)

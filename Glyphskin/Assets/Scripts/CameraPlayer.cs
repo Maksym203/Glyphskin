@@ -11,7 +11,7 @@ public class CameraPlayer : MonoBehaviour
         // Keep camera centered on the player
         transform.position = new Vector3(
             target.position.x,
-            target.position.y,
+            target.position.y+1,
             transform.position.z
         );
     }
