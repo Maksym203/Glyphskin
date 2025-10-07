@@ -23,12 +23,20 @@ public class Player : MonoBehaviour
     private bool zeroTimerExpired = false;
     private float maxZeroTime = 0.15f;
 
+    private bool jumpTopAnimation = false;
+    private float jumpTopCounter = 0f;
+
     private enum PlayerState
     {
         IdleLeft,
         IdleRight,
         WalkLeft,
-        WalkRight
+        WalkRight,
+        JumpStart,
+        JumpUp,
+        JumpTop,
+        JumpDown,
+        JumpLand
     }
 
     void Awake()
@@ -172,18 +180,53 @@ public class Player : MonoBehaviour
 
     private void UpdateState()
     {
+        float vy = rb.linearVelocity.y;
+
+        //Midair
         if (!isGrounded)
         {
-            // Keep idle animation direction while jumping/falling
-            if (currentState == PlayerState.WalkRight || currentState == PlayerState.IdleRight)
-                currentState = PlayerState.IdleRight;
-            else
-                currentState = PlayerState.IdleLeft;
+            if (isJumping && jumpTimeCounter < 0.05f)
+            {
+                currentState = PlayerState.JumpStart;
+                jumpTopAnimation = false;
+            }
+            else if (vy > 0.01f)
+                currentState = PlayerState.JumpUp;
+            else if (Mathf.Abs(vy) <= 0.01f)
+            {
+                currentState = PlayerState.JumpTop;
+            }
+            else if (vy < -0.01f)
+            {
+                if (jumpTopAnimation == false && jumpTopCounter <= 0.1f)
+                {
+                    currentState = PlayerState.JumpTop;
+                    jumpTopCounter += Time.deltaTime;
+                }
+                else
+                {
+                    jumpTopAnimation = true;
+                    jumpTopCounter = 0f;
+                    currentState = PlayerState.JumpDown;
+                }
+            }
 
             return;
         }
 
-        // Ground
+        //Falling check even if grounded
+        if (vy < -0.01f)
+        {
+            currentState = PlayerState.JumpDown;
+            jumpTopAnimation = true;
+            jumpTopCounter = 0f;
+            return;
+        }
+
+        //To fix landing stuck animation
+        currentState = PlayerState.IdleRight;
+
+        //Grounded
         if (moveInput.x > 0.1f)
             currentState = PlayerState.WalkRight;
         else if (moveInput.x < -0.1f)
@@ -209,6 +252,21 @@ public class Player : MonoBehaviour
                 break;
             case PlayerState.WalkLeft:
                 animator.Play("Walk_Left");
+                break;
+            case PlayerState.JumpStart:
+                animator.Play("Jump_Start");
+                break;
+            case PlayerState.JumpUp:
+                animator.Play("Jump_Up");
+                break;
+            case PlayerState.JumpTop:
+                animator.Play("Jump_Start");
+                break;
+            case PlayerState.JumpDown:
+                animator.Play("Jump_Up");
+                break;
+            case PlayerState.JumpLand:
+                animator.Play("Jump_Start");
                 break;
         }
     }
