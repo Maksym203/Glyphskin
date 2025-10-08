@@ -588,7 +588,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -566, y: 251}
+  m_AnchoredPosition: {x: -559, y: 251}
   m_SizeDelta: {x: -1154.3501, y: -543.6389}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &934369231
@@ -967,9 +967,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   moveSpeed: 4
-  jumpForce: 11
-  jumpDuration: 0.5
+  jumpForce: 8
+  jumpDuration: 0.6
   lifeManager: {fileID: 177062434}
+  attackLeftPrefab: {fileID: 4256385749928712039, guid: d97ffa393d18f4148a97cd4e940fac72, type: 3}
+  attackRightPrefab: {fileID: 6621158578764785083, guid: fd461ec4a4e37a74ebd36bee4bfb561d, type: 3}
+  attackUpPrefab: {fileID: 3423731934705906955, guid: c115b7942be22b94f9018bd4997a0fe5, type: 3}
+  attackDownPrefab: {fileID: 2011904265893094954, guid: 00525407857961641b02c658da701716, type: 3}
 --- !u!95 &1397538285
 Animator:
   serializedVersion: 7

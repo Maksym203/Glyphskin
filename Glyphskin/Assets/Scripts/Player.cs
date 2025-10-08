@@ -5,9 +5,14 @@ public class Player : MonoBehaviour
 {
     public float moveSpeed = 5f;
     public float jumpForce = 2f;
-    public float jumpDuration = 0.5f;
+    public float jumpDuration = 1.5f;
 
     public LifeManager lifeManager;
+
+    public GameObject attackLeftPrefab;
+    public GameObject attackRightPrefab;
+    public GameObject attackUpPrefab;
+    public GameObject attackDownPrefab;
 
     private Rigidbody2D rb;
     private Animator animator;
@@ -18,7 +23,7 @@ public class Player : MonoBehaviour
     private float jumpTimeCounter = 0f;
     private bool isGrounded = true;
 
-    private float zeroTimerDuration = 0.05f;
+    private float zeroTimerDuration = 0.1f;
     private float zeroThreshold = 0.01f;
     private float zeroTimer = 0f;
     private bool zeroTimerRunning = false;
@@ -33,6 +38,10 @@ public class Player : MonoBehaviour
     private bool facingRight = true;
 
     private bool isTakingDamage = false;
+
+    private float auxTime = 0f;
+    private float auxTimerJump = 0f;
+    private bool jumpStartTimer = false;
 
     private enum PlayerState
     {
@@ -92,14 +101,25 @@ public class Player : MonoBehaviour
             if (vertical > 0.5f)
             {
                 currentState = PlayerState.AttackUp;
+                MakeAttack(3);
             }
             else if (vertical < -0.5f && !isGrounded)
             {
                 currentState = PlayerState.AttackDown;
+                MakeAttack(4);
             }
             else
             {
-                currentState = facingRight ? PlayerState.AttackRight : PlayerState.AttackLeft;
+                if (facingRight)
+                {
+                    currentState = PlayerState.AttackRight;
+                    MakeAttack(2);
+                }
+                else
+                {
+                    currentState = PlayerState.AttackLeft;
+                    MakeAttack(1);
+                }
             }
 
             return;
@@ -162,11 +182,22 @@ public class Player : MonoBehaviour
             zeroTimerExpired = false;
         }
 
-        if (Input.GetButtonDown("Jump") && isGrounded && currentState != PlayerState.JumpDown)
+        if (jumpStartTimer == true)
+        {
+            auxTimerJump += Time.deltaTime;
+            if (auxTimerJump >= 0.5f)
+            {
+                jumpStartTimer = false;
+                auxTimerJump = 0f;
+            }
+        }
+
+        if ((Input.GetButtonDown("Jump") || Input.GetButton("Jump")) && isGrounded && !jumpStartTimer && currentState != PlayerState.JumpDown)
         {
             isJumping = true;
             jumpTimeCounter = 0f;
             isGrounded = false;
+            jumpStartTimer = true;
 
             float horizontalVelocity = rb.linearVelocity.x;
             if (Mathf.Abs(moveInput.x) > 0.1f)
@@ -174,10 +205,11 @@ public class Player : MonoBehaviour
             else
                 horizontalVelocity = 0f;
 
-            rb.linearVelocity = new Vector2(horizontalVelocity, jumpForce);
+            rb.linearVelocity = new Vector2(horizontalVelocity, jumpForce*0.7f);
+            auxTime = 0f;
         }
 
-        if (Input.GetButton("Jump") && isJumping && currentState != PlayerState.JumpDown)
+        if (Input.GetButton("Jump") && isJumping && currentState != PlayerState.JumpDown && auxTime >= 0.1f)
         {
             jumpTimeCounter += Time.deltaTime;
             if (jumpTimeCounter < jumpDuration)
@@ -190,7 +222,12 @@ public class Player : MonoBehaviour
             else
             {
                 isJumping = false;
+                auxTime = 0f;
             }
+        }
+        else if (isJumping)
+        {
+            auxTime += Time.deltaTime;
         }
 
         if (Input.GetButtonUp("Jump") && currentState != PlayerState.JumpDown)
@@ -199,6 +236,32 @@ public class Player : MonoBehaviour
         }
     }
 
+    private void MakeAttack(int attackId)
+    {
+        switch (attackId)
+        {
+            case 1:
+                Vector3 position1 = transform.position + new Vector3(-0.55f, 0f, 0f);
+                Quaternion rotation1 = Quaternion.identity;
+                GameObject attackInstance1 = Instantiate(attackLeftPrefab, position1, rotation1);
+                break;
+            case 2:
+                Vector3 position2 = transform.position + new Vector3(0.55f, 0f, 0f);
+                Quaternion rotation2 = Quaternion.identity;
+                GameObject attackInstance2 = Instantiate(attackRightPrefab, position2, rotation2);
+                break;
+            case 3:
+                Vector3 position3 = transform.position + new Vector3(0f, 0.35f, 0f);
+                Quaternion rotation3 = Quaternion.identity;
+                GameObject attackInstance3 = Instantiate(attackUpPrefab, position3, rotation3);
+                break;
+            case 4:
+                Vector3 position4 = transform.position + new Vector3(0f, -0.65f, 0f);
+                Quaternion rotation4 = Quaternion.identity;
+                GameObject attackInstance4 = Instantiate(attackDownPrefab, position4, rotation4);
+                break;
+        }
+    }
 
     private void Move()
     {
@@ -260,8 +323,11 @@ public class Player : MonoBehaviour
         {
             if (isJumping && jumpTimeCounter < 0.05f)
             {
-                currentState = PlayerState.JumpStart;
-                jumpTopAnimation = false;
+                if (currentState != PlayerState.JumpStart)
+                {
+                    currentState = PlayerState.JumpStart;
+                    jumpTopAnimation = false;
+                }
             }
             else if (vy > 0.01f)
                 currentState = PlayerState.JumpUp;
@@ -296,9 +362,6 @@ public class Player : MonoBehaviour
             return;
         }
 
-        //To fix landing stuck animation
-        currentState = PlayerState.IdleRight;
-
         //Grounded
         if (moveInput.x > 0.1f)
             currentState = PlayerState.WalkRight;
@@ -308,6 +371,13 @@ public class Player : MonoBehaviour
             currentState = PlayerState.IdleRight;
         else if (currentState == PlayerState.WalkLeft)
             currentState = PlayerState.IdleLeft;
+        else
+        {
+            if (facingRight)
+                currentState = PlayerState.IdleRight;
+            else
+                currentState = PlayerState.IdleLeft;
+        }
     }
 
     private void UpdateAnimation()
