@@ -1,11 +1,13 @@
 using UnityEngine;
+using System.Collections;
 
 public class Player : MonoBehaviour
 {
-    [Header("Movement Settings")]
     public float moveSpeed = 5f;
     public float jumpForce = 2f;
     public float jumpDuration = 0.5f;
+
+    public LifeManager lifeManager;
 
     private Rigidbody2D rb;
     private Animator animator;
@@ -30,6 +32,8 @@ public class Player : MonoBehaviour
     private float attackTimer = 0f;
     private bool facingRight = true;
 
+    private bool isTakingDamage = false;
+
     private enum PlayerState
     {
         IdleLeft,
@@ -44,7 +48,8 @@ public class Player : MonoBehaviour
         AttackLeft,
         AttackRight,
         AttackDown,
-        AttackUp
+        AttackUp,
+        Damage
     }
 
     void Awake()
@@ -62,11 +67,17 @@ public class Player : MonoBehaviour
 
     void FixedUpdate()
     {
+        if (isGrounded && Mathf.Abs(rb.linearVelocity.y) < 0.01f && isTakingDamage)
+        {
+            rb.linearVelocity = new Vector2(0f, rb.linearVelocity.y);
+        }
         Move();
     }
 
     private void HandleInput()
     {
+        if (isTakingDamage) return;
+
         //Get stick input
         float horizontal = Input.GetAxisRaw("Horizontal");
         float vertical = Input.GetAxisRaw("Vertical");
@@ -191,6 +202,8 @@ public class Player : MonoBehaviour
 
     private void Move()
     {
+        if (isTakingDamage) return;
+
         float horizontalDirection = 0f;
 
         if (moveInput.x >= 0.1f)
@@ -227,6 +240,8 @@ public class Player : MonoBehaviour
 
     private void UpdateState()
     {
+        if (isTakingDamage) return;
+
         if (isAttacking)
         {
             //Dont override if we are already in AttackUp or AttackDown
@@ -338,6 +353,52 @@ public class Player : MonoBehaviour
             case PlayerState.AttackDown:
                 animator.Play("Attack_Down");
                 break;
+            case PlayerState.Damage:
+                animator.Play("Damage");
+                break;
         }
+    }
+
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        if (other.CompareTag("Enemy") && !isTakingDamage)
+        {
+            isTakingDamage = true;
+
+            lifeManager.UpdateHearts(lifeManager.currentLife - 1);
+            lifeManager.FlickerHearts();
+
+            //Stop player movement immediately
+            rb.linearVelocity = Vector2.zero;
+
+            //Calculate knockback direction
+            float knockbackForceX = 5f;
+            float knockbackForceY = 3f;
+            Vector2 knockback = (transform.position.x < other.transform.position.x)
+                ? new Vector2(-knockbackForceX, knockbackForceY)
+                : new Vector2(knockbackForceX, knockbackForceY);
+
+            //Apply knockback
+            rb.linearVelocity = knockback;
+
+            //Start coroutine to wait for animation end
+            StartCoroutine(DamageCoroutine());
+        }
+    }
+
+    private IEnumerator DamageCoroutine()
+    {
+        isTakingDamage = true;
+        isGrounded = true;
+        currentState = PlayerState.Damage;
+
+        yield return new WaitForSeconds(0.8f);
+
+        isTakingDamage = false;
+
+        if (facingRight)
+            currentState = PlayerState.IdleRight;
+        else
+            currentState = PlayerState.IdleLeft;
     }
 }
