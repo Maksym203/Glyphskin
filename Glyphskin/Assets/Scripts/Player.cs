@@ -42,7 +42,9 @@ public class Player : MonoBehaviour
         JumpDown,
         JumpLand,
         AttackLeft,
-        AttackRight
+        AttackRight,
+        AttackDown,
+        AttackUp
     }
 
     void Awake()
@@ -65,39 +67,54 @@ public class Player : MonoBehaviour
 
     private void HandleInput()
     {
-        if (Input.GetButtonDown("Fire1") && !isAttacking)
+        //Get stick input
+        float horizontal = Input.GetAxisRaw("Horizontal");
+        float vertical = Input.GetAxisRaw("Vertical");
+        moveInput = new Vector2(horizontal, vertical);
+
+        if ((Input.GetButtonDown("Fire1") || Input.GetKeyDown(KeyCode.J)) && !isAttacking)
         {
             isAttacking = true;
             attackTimer = 0f;
-            currentState = facingRight ? PlayerState.AttackRight : PlayerState.AttackLeft;
+
+            //Directional attacks
+            if (vertical > 0.5f)
+            {
+                currentState = PlayerState.AttackUp;
+            }
+            else if (vertical < -0.5f && !isGrounded)
+            {
+                currentState = PlayerState.AttackDown;
+            }
+            else
+            {
+                currentState = facingRight ? PlayerState.AttackRight : PlayerState.AttackLeft;
+            }
+
             return;
         }
 
         if (isAttacking)
         {
             attackTimer += Time.deltaTime;
-            if (attackTimer >= 0.2f)
+            if (attackTimer >= 0.3f)
             {
                 isAttacking = false;
                 attackTimer = 0f;
             }
         }
 
-        moveInput.x = Input.GetAxisRaw("Horizontal");
-
         if (!isGrounded)
         {
             float vy = rb.linearVelocity.y;
             bool nearlyZero = Mathf.Abs(vy) <= zeroThreshold;
 
-            //First time we hit nearly zero while midair, start the timer (only if not already started)
             if (!zeroTimerRunning && !zeroTimerExpired && nearlyZero)
             {
                 zeroTimerRunning = true;
                 zeroTimer = 0f;
             }
 
-            //If the timer is running, update it
             if (zeroTimerRunning)
             {
                 zeroTimer += Time.deltaTime;
@@ -114,12 +131,10 @@ public class Player : MonoBehaviour
                 if (zeroTimer >= zeroTimerDuration)
                 {
                     zeroTimerRunning = false;
-                    //Timer finished; next zero will set grounded
                     zeroTimerExpired = true;
                 }
             }
 
-            //If timer already expired, the next time velocity is zero we set grounded
             if (zeroTimerExpired && nearlyZero)
             {
                 isJumping = false;
@@ -131,42 +146,34 @@ public class Player : MonoBehaviour
         }
         else
         {
-            // if already grounded reset the zero-timer states
             zeroTimer = 0f;
             zeroTimerRunning = false;
             zeroTimerExpired = false;
         }
 
-        if (Input.GetButtonDown("Jump") && isGrounded)
+        if (Input.GetButtonDown("Jump") && isGrounded && currentState != PlayerState.JumpDown)
         {
             isJumping = true;
             jumpTimeCounter = 0f;
             isGrounded = false;
 
             float horizontalVelocity = rb.linearVelocity.x;
-
             if (Mathf.Abs(moveInput.x) > 0.1f)
-            {
                 horizontalVelocity = moveInput.x * moveSpeed;
-            }
             else
-            {
                 horizontalVelocity = 0f;
-            }
 
             rb.linearVelocity = new Vector2(horizontalVelocity, jumpForce);
         }
 
-        if (Input.GetButton("Jump") && isJumping)
+        if (Input.GetButton("Jump") && isJumping && currentState != PlayerState.JumpDown)
         {
             jumpTimeCounter += Time.deltaTime;
-
             if (jumpTimeCounter < jumpDuration)
             {
                 float t = jumpTimeCounter / jumpDuration;
                 float curve = Mathf.Pow(1f - t, 1.1f);
                 float adjustedForce = jumpForce * curve;
-
                 rb.linearVelocity = new Vector2(rb.linearVelocity.x, adjustedForce);
             }
             else
@@ -175,42 +182,58 @@ public class Player : MonoBehaviour
             }
         }
 
-        if (Input.GetButtonUp("Jump"))
+        if (Input.GetButtonUp("Jump") && currentState != PlayerState.JumpDown)
         {
             isJumping = false;
         }
     }
 
+
     private void Move()
     {
+        float horizontalDirection = 0f;
+
+        if (moveInput.x >= 0.1f)
+            horizontalDirection = 1f;
+        else if (moveInput.x <= -0.1f)
+            horizontalDirection = -1f;
+
         float currentMoveSpeed = moveSpeed;
 
         if (isGrounded)
         {
-            // Grounded movement: normal speed, fully controlled
-            rb.linearVelocity = new Vector2(moveInput.x * currentMoveSpeed, rb.linearVelocity.y);
+            // Grounded: full speed if moving, else 0
+            rb.linearVelocity = new Vector2(horizontalDirection * currentMoveSpeed, rb.linearVelocity.y);
         }
         else
         {
-            // Midair movement: only apply input if player is pressing left/right
-            if (Mathf.Abs(moveInput.x) > 0.01f)
+            // Midair: full speed if moving horizontally, else slower drift
+            if (Mathf.Abs(horizontalDirection) > 0f)
             {
-                // Slightly reduced air control
-                rb.linearVelocity = new Vector2(moveInput.x * currentMoveSpeed * 0.8f, rb.linearVelocity.y);
+                rb.linearVelocity = new Vector2(horizontalDirection * currentMoveSpeed, rb.linearVelocity.y);
+            }
+            else
+            {
+                rb.linearVelocity = new Vector2(rb.linearVelocity.x * 0.8f, rb.linearVelocity.y); // slower drift
             }
         }
 
-        if (moveInput.x > 0.1f)
+        //Update facing direction
+        if (horizontalDirection > 0f)
             facingRight = true;
-        else if (moveInput.x < -0.1f)
+        else if (horizontalDirection < 0f)
             facingRight = false;
     }
-
 
     private void UpdateState()
     {
         if (isAttacking)
         {
+            //Dont override if we are already in AttackUp or AttackDown
+            if (currentState == PlayerState.AttackUp || currentState == PlayerState.AttackDown)
+                return;
+
+            //Otherwise use left/right attack as default
             currentState = facingRight ? PlayerState.AttackRight : PlayerState.AttackLeft;
             return;
         }
@@ -308,6 +331,12 @@ public class Player : MonoBehaviour
                 break;
             case PlayerState.AttackLeft:
                 animator.Play("Attack_Left");
+                break;
+            case PlayerState.AttackUp:
+                animator.Play("Attack_Up");
+                break;
+            case PlayerState.AttackDown:
+                animator.Play("Attack_Down");
                 break;
         }
     }
