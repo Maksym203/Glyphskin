@@ -1,16 +1,19 @@
 fileFormatVersion: 2
-guid: f65c12a54e04aa247b7afd0b61cd55c8
+guid: 63b2722981608424ab3e8021caa72fbc
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -6007857137893288414
-    second: Sprite-0001_0
+      213: -6212547266420452164
+    second: Attack_Right_0
   - first:
-      213: 4245052342988409972
-    second: Sprite-0001_1
+      213: 2855198294924756859
+    second: Attack_Right_1
   - first:
-      213: -7732569738864306783
-    second: Sprite-0001_2
+      213: -3331584456539908725
+    second: Attack_Right_2
+  - first:
+      213: 3327184685675285436
+    second: Attack_Right_3
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -43,7 +46,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 1
+    filterMode: 0
     aniso: 1
     mipBias: 0
     wrapU: 1
@@ -54,7 +57,7 @@ TextureImporter:
   compressionQuality: 50
   spriteMode: 2
   spriteExtrude: 1
-  spriteMeshType: 0
+  spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
   spritePixelsToUnits: 100
@@ -106,51 +109,7 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Sprite-0001_0
-      rect:
-        serializedVersion: 2
-        x: 0
-        y: 240
-        width: 120
-        height: 120
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 226539a93cdcf9ca0800000000000000
-      internalID: -6007857137893288414
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Sprite-0001_1
-      rect:
-        serializedVersion: 2
-        x: 0
-        y: 120
-        width: 120
-        height: 120
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 47c83cc5d9479ea30800000000000000
-      internalID: 4245052342988409972
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Sprite-0001_2
+      name: Attack_Right_0
       rect:
         serializedVersion: 2
         x: 0
@@ -165,8 +124,74 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 1a5de0a9ac460b490800000000000000
-      internalID: -7732569738864306783
+      spriteID: cb45faa3d2998c9a0800000000000000
+      internalID: -6212547266420452164
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Attack_Right_1
+      rect:
+        serializedVersion: 2
+        x: 120
+        y: 0
+        width: 120
+        height: 120
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b778a44c8b3bf9720800000000000000
+      internalID: 2855198294924756859
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Attack_Right_2
+      rect:
+        serializedVersion: 2
+        x: 240
+        y: 0
+        width: 120
+        height: 120
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b85d9b89695d3c1d0800000000000000
+      internalID: -3331584456539908725
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Attack_Right_3
+      rect:
+        serializedVersion: 2
+        x: 360
+        y: 0
+        width: 120
+        height: 120
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cbb8bcbe7d88c2e20800000000000000
+      internalID: 3327184685675285436
       vertices: []
       indices: 
       edges: []
@@ -175,7 +200,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: d269d15578f29574a9e7812e92522265
+    spriteID: f189fcccfa239d44da38af29ee1282ed
     internalID: 0
     vertices: []
     indices: 
@@ -185,9 +210,10 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Sprite-0001_0: -6007857137893288414
-      Sprite-0001_1: 4245052342988409972
-      Sprite-0001_2: -7732569738864306783
+      Attack_Right_0: -6212547266420452164
+      Attack_Right_1: 2855198294924756859
+      Attack_Right_2: -3331584456539908725
+      Attack_Right_3: 3327184685675285436
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

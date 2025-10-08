@@ -26,6 +26,10 @@ public class Player : MonoBehaviour
     private bool jumpTopAnimation = false;
     private float jumpTopCounter = 0f;
 
+    private bool isAttacking = false;
+    private float attackTimer = 0f;
+    private bool facingRight = true;
+
     private enum PlayerState
     {
         IdleLeft,
@@ -36,7 +40,9 @@ public class Player : MonoBehaviour
         JumpUp,
         JumpTop,
         JumpDown,
-        JumpLand
+        JumpLand,
+        AttackLeft,
+        AttackRight
     }
 
     void Awake()
@@ -59,6 +65,24 @@ public class Player : MonoBehaviour
 
     private void HandleInput()
     {
+        if (Input.GetButtonDown("Fire1") && !isAttacking)
+        {
+            isAttacking = true;
+            attackTimer = 0f;
+            currentState = facingRight ? PlayerState.AttackRight : PlayerState.AttackLeft;
+            return;
+        }
+
+        if (isAttacking)
+        {
+            attackTimer += Time.deltaTime;
+            if (attackTimer >= 0.2f)
+            {
+                isAttacking = false;
+                attackTimer = 0f;
+            }
+        }
+
         moveInput.x = Input.GetAxisRaw("Horizontal");
 
         if (!isGrounded)
@@ -175,11 +199,22 @@ public class Player : MonoBehaviour
                 rb.linearVelocity = new Vector2(moveInput.x * currentMoveSpeed * 0.8f, rb.linearVelocity.y);
             }
         }
+
+        if (moveInput.x > 0.1f)
+            facingRight = true;
+        else if (moveInput.x < -0.1f)
+            facingRight = false;
     }
 
 
     private void UpdateState()
     {
+        if (isAttacking)
+        {
+            currentState = facingRight ? PlayerState.AttackRight : PlayerState.AttackLeft;
+            return;
+        }
+
         float vy = rb.linearVelocity.y;
 
         //Midair
@@ -267,6 +302,12 @@ public class Player : MonoBehaviour
                 break;
             case PlayerState.JumpLand:
                 animator.Play("Jump_Start");
+                break;
+            case PlayerState.AttackRight:
+                animator.Play("Attack_Right");
+                break;
+            case PlayerState.AttackLeft:
+                animator.Play("Attack_Left");
                 break;
         }
     }
