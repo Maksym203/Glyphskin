@@ -13,9 +13,9 @@ TagManager:
   - 
   - Water
   - UI
-  - 
-  - 
-  - 
+  - UI_Blur
+  - PostProcessing
+  - Focused
   - 
   - 
   - 
@@ -42,6 +42,24 @@ TagManager:
   m_SortingLayers:
   - name: Default
     uniqueID: 0
+    locked: 0
+  - name: CameraSortingLayer
+    uniqueID: 390223179
+    locked: 0
+  - name: Background
+    uniqueID: 1600428273
+    locked: 0
+  - name: Background1
+    uniqueID: 2747713781
+    locked: 0
+  - name: BackGround2
+    uniqueID: 1567275231
+    locked: 0
+  - name: Main
+    uniqueID: 3767358001
+    locked: 0
+  - name: Close
+    uniqueID: 4142535081
     locked: 0
   m_RenderingLayers:
   - Default
