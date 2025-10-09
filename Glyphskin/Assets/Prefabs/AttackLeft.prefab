@@ -11,9 +11,10 @@ GameObject:
   - component: {fileID: 756384467789357127}
   - component: {fileID: 5390822466876676202}
   - component: {fileID: 4238068168128633998}
+  - component: {fileID: 6531688984177346847}
   m_Layer: 0
   m_Name: AttackLeft
-  m_TagString: Untagged
+  m_TagString: PlayerAttack
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -100,7 +101,52 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 929153b246b5c1b4b8c29404a69c517f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  firstSprite: {fileID: 4061970257397983486, guid: 442ba8912191a0e45a02fae9f14b2d7c, type: 3}
-  secondSprite: {fileID: -1737686772517399896, guid: 442ba8912191a0e45a02fae9f14b2d7c, type: 3}
-  swapDelay: 0.05
-  destroyDelayAfterSwap: 0.05
+  lifetime: 0.08
+  xOffset: -0.55
+  yOffset: 0
+--- !u!61 &6531688984177346847
+BoxCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4256385749928712039}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 1
+  m_UsedByEffector: 0
+  m_CompositeOperation: 0
+  m_CompositeOrder: 0
+  m_Offset: {x: 0, y: 0}
+  m_SpriteTilingProperty:
+    border: {x: 0, y: 0, z: 0, w: 0}
+    pivot: {x: 0.5, y: 0.5}
+    oldSize: {x: 0.4, y: 0.3}
+    newSize: {x: 1, y: 1}
+    adaptiveTilingThreshold: 0.5
+    drawMode: 0
+    adaptiveTiling: 0
+  m_AutoTiling: 0
+  m_Size: {x: 0.46, y: 0.3}
+  m_EdgeRadius: 0

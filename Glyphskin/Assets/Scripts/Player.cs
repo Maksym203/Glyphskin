@@ -14,14 +14,15 @@ public class Player : MonoBehaviour
     public GameObject attackUpPrefab;
     public GameObject attackDownPrefab;
 
+    public bool isGrounded = true;
+
     private Rigidbody2D rb;
     private Animator animator;
     private Vector2 moveInput;
 
-    private PlayerState currentState;
+    public PlayerState currentState;
     private bool isJumping = false;
     private float jumpTimeCounter = 0f;
-    private bool isGrounded = true;
 
     private float zeroTimerDuration = 0.1f;
     private float zeroThreshold = 0.01f;
@@ -43,7 +44,10 @@ public class Player : MonoBehaviour
     private float auxTimerJump = 0f;
     private bool jumpStartTimer = false;
 
-    private enum PlayerState
+    private bool enemyJump = false;
+    private bool enemyJumpAux = false;
+
+    public enum PlayerState
     {
         IdleLeft,
         IdleRight,
@@ -192,12 +196,22 @@ public class Player : MonoBehaviour
             }
         }
 
-        if ((Input.GetButtonDown("Jump") || Input.GetButton("Jump")) && isGrounded && !jumpStartTimer && currentState != PlayerState.JumpDown)
+        if (((Input.GetButtonDown("Jump") || Input.GetButton("Jump")) && isGrounded && !jumpStartTimer && currentState != PlayerState.JumpDown) || enemyJump)
         {
             isJumping = true;
             jumpTimeCounter = 0f;
             isGrounded = false;
             jumpStartTimer = true;
+
+            float additionalstrength = 1f;
+
+            if (enemyJump)
+            {
+                enemyJump = false;
+                enemyJumpAux = true;
+                isJumping = false;
+                additionalstrength = 1.4f;
+            }
 
             float horizontalVelocity = rb.linearVelocity.x;
             if (Mathf.Abs(moveInput.x) > 0.1f)
@@ -205,11 +219,11 @@ public class Player : MonoBehaviour
             else
                 horizontalVelocity = 0f;
 
-            rb.linearVelocity = new Vector2(horizontalVelocity, jumpForce*0.7f);
+            rb.linearVelocity = new Vector2(horizontalVelocity, jumpForce*0.7f*additionalstrength);
             auxTime = 0f;
         }
 
-        if (Input.GetButton("Jump") && isJumping && currentState != PlayerState.JumpDown && auxTime >= 0.1f)
+        if (Input.GetButton("Jump") && isJumping && currentState != PlayerState.JumpDown && auxTime >= 0.1f && !enemyJumpAux)
         {
             jumpTimeCounter += Time.deltaTime;
             if (jumpTimeCounter < jumpDuration)
@@ -347,6 +361,7 @@ public class Player : MonoBehaviour
                     jumpTopAnimation = true;
                     jumpTopCounter = 0f;
                     currentState = PlayerState.JumpDown;
+                    enemyJumpAux = false;
                 }
             }
 
@@ -357,6 +372,7 @@ public class Player : MonoBehaviour
         if (vy < -0.01f)
         {
             currentState = PlayerState.JumpDown;
+            enemyJumpAux = false;
             jumpTopAnimation = true;
             jumpTopCounter = 0f;
             return;
@@ -470,5 +486,16 @@ public class Player : MonoBehaviour
             currentState = PlayerState.IdleRight;
         else
             currentState = PlayerState.IdleLeft;
+    }
+
+    public void EnemyJump()
+    {
+        enemyJump = true;
+        isGrounded = true;
+        jumpTopAnimation = true;
+        jumpTopCounter = 0f;
+        zeroTimer = 0f;
+        zeroTimerRunning = false;
+        zeroTimerExpired = false;
     }
 }
