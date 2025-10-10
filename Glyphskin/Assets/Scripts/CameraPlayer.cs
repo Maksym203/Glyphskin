@@ -10,6 +10,9 @@ public class CameraPlayer : MonoBehaviour
     public float fallDuration = 1f;
     public float riseDuration = 0.3f;
 
+    public float minX = -3.170f;
+    public float maxX = 10000f;
+
     private float currentYOffset = 0f;
     private float offsetTimer = 0f;
     private bool wasFalling = false;
@@ -49,8 +52,10 @@ public class CameraPlayer : MonoBehaviour
             currentYOffset = Mathf.Lerp(currentYOffset, 0f, progress);
         }
 
+        float clampedX = Mathf.Clamp(targetX, minX, maxX);
+
         transform.position = new Vector3(
-            targetX,
+            clampedX,
             target.position.y + currentYOffset,
             transform.position.z
         );

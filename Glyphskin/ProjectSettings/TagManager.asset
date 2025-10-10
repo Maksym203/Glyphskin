@@ -55,8 +55,20 @@ TagManager:
   - name: BackGround2
     uniqueID: 1567275231
     locked: 0
+  - name: MainBack
+    uniqueID: 3574028429
+    locked: 0
   - name: Main
     uniqueID: 3767358001
+    locked: 0
+  - name: MainFront
+    uniqueID: 1679760053
+    locked: 0
+  - name: FrontGround1
+    uniqueID: 1196991737
+    locked: 0
+  - name: FrontGround2
+    uniqueID: 3104514185
     locked: 0
   - name: Close
     uniqueID: 4142535081
